@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
-SHUK_ROOT="${SHUK_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+# Resolve the real script location even when ~/.local/bin/shuk is a symlink.
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+while [[ -L "$SCRIPT_PATH" ]]; do
+  SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+  LINK_TARGET="$(readlink "$SCRIPT_PATH")"
+  if [[ "$LINK_TARGET" = /* ]]; then
+    SCRIPT_PATH="$LINK_TARGET"
+  else
+    SCRIPT_PATH="$SCRIPT_DIR/$LINK_TARGET"
+  fi
+done
+SHUK_ROOT="${SHUK_ROOT:-$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)}"
 source "$SHUK_ROOT/core/banner.sh"
 source "$SHUK_ROOT/core/logging.sh"
 
