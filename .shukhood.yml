@@ -1,0 +1,69 @@
+shukhood:
+  theme: nord
+  banner: true
+  default_tool: hermes
+  repo_root: ~/Developer/shukhood
+
+hermes:
+  enabled: true
+  profile: shukhood
+  preload_skills:
+    - shukhood-router
+  raw_command: hermes
+  launch_args:
+    - --profile
+    - shukhood
+  backup:
+    include_skills: true
+    include_config: true
+    include_mcp: true
+    include_cron: false
+    sanitize: true
+
+codex:
+  enabled: false
+  raw_command: codex
+
+claude:
+  enabled: false
+  raw_command: claude
+
+agy:
+  enabled: false
+  raw_command: agy
+
+opencode:
+  enabled: false
+  raw_command: opencode
+
+tools:
+  required:
+    - git
+    - gh
+    - curl
+    - jq
+    - node
+    - npm
+    - npx
+    - python3
+    - uv
+  optional:
+    - hermes
+    - codex
+    - claude
+    - agy
+    - opencode
+    - vercel
+    - supabase
+    - wrangler
+    - docker
+    - psql
+    - ffmpeg
+    - pyfiglet
+    - toilet
+    - boxes
+
+secrets:
+  mode: local-env
+  env_file: ~/.hermes/.env
+  example: secrets/.env.example

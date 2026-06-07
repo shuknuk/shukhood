@@ -1,0 +1,4 @@
+# Shukhood Hermes profile config template.
+# Apply with: shuk hermes setup
+# Secrets belong in local .env files or encrypted stores, not here.
+profile_name: shukhood

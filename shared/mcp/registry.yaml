@@ -1,0 +1,45 @@
+servers:
+  github:
+    enabled: true
+    description: GitHub repos, issues, pull requests, and Actions.
+    env:
+      GITHUB_PERSONAL_ACCESS_TOKEN: ${GITHUB_TOKEN}
+    support:
+      hermes: true
+      claude: true
+      codex: false
+
+  context7:
+    enabled: true
+    description: Up-to-date library/framework documentation lookup.
+    support:
+      hermes: true
+      claude: true
+      codex: false
+
+  filesystem:
+    enabled: true
+    description: Controlled access to approved local project directories.
+    paths:
+      - ${HOME}/Developer
+      - ${HOME}/shukhood
+    support:
+      hermes: true
+      claude: true
+      codex: false
+
+  supabase:
+    enabled: false
+    description: Supabase projects, database, auth, and edge functions.
+    env:
+      SUPABASE_ACCESS_TOKEN: ${SUPABASE_ACCESS_TOKEN}
+
+  vercel:
+    enabled: false
+    description: Vercel projects, deployments, logs, and environment variables.
+    env:
+      VERCEL_TOKEN: ${VERCEL_TOKEN}
+
+  playwright:
+    enabled: false
+    description: Browser automation for QA and app verification.

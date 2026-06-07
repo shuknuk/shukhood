@@ -1,0 +1,51 @@
+# Secrets
+.env
+*.env
+!.env.example
+secrets/*.env
+!secrets/.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+auth.json
+credentials.json
+token.json
+
+# Hermes sensitive/runtime data
+**/sessions/
+**/logs/
+**/cache/
+**/.cache/
+**/auth.json
+**/.env
+**/memories/
+**/memory/
+**/browser/
+**/cookies/
+**/oauth/
+**/tokens/
+**/credentials/
+
+# Dependencies/runtime
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+
+# Generated backups
+backups/
+*.bak
+*.backup
+*.tmp
+
+# Allow examples/templates
+!**/*.template
+!**/*.example
+!**/.env.example

@@ -1,0 +1,23 @@
+skills:
+  shukhood-router:
+    family: shukhood
+    purpose: Always-loaded routing skill for the Shukhood Hermes profile.
+    preload: true
+
+  gstack-qa:
+    family: gstack
+    purpose: Web app QA and browser bug discovery.
+    triggers: ["QA this app", "test this website", "dogfood", "find browser bugs", "verify deployed app"]
+    avoid_for: ["static code review only", "pure backend unit tests"]
+    required_toolsets: [browser, terminal, file]
+
+  gstack-review:
+    family: gstack
+    purpose: Pre-landing code/PR review.
+    triggers: ["review this PR", "review this diff", "check before merge", "code review"]
+    required_toolsets: [terminal, github, file]
+
+  hermes-agent:
+    family: hermes
+    purpose: Configure, extend, or troubleshoot Hermes Agent.
+    triggers: ["hermes config", "hermes setup", "hermes tools", "hermes skills", "hermes mcp", "hermes profile", "hermes gateway"]

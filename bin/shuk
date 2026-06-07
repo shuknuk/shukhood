@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+SHUK_ROOT="${SHUK_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+source "$SHUK_ROOT/core/banner.sh"
+source "$SHUK_ROOT/core/logging.sh"
+
+usage() {
+  shuk_banner
+  cat <<'USAGE'
+
+Usage:
+  shuk                     Show this help
+  shuk setup               Install/link the shuk command
+  shuk doctor              Check Shukhood and supported tools
+  shuk backup              Back up safe configs for supported tools
+  shuk update              Update Shukhood git repo
+
+  shuk hermes              Launch Hermes with Shukhood profile
+  shuk hermes raw          Launch raw official Hermes
+  shuk hermes setup        Create/apply Hermes shukhood profile
+  shuk hermes backup       Back up safe Hermes profile/config files
+  shuk hermes doctor       Check Hermes, profile, skills, and MCP readiness
+  shuk hermes update       Run official Hermes update
+
+Examples:
+  shuk hermes
+  shuk hermes chat -q "hello"
+  shuk hermes setup --dry-run
+  shuk doctor
+USAGE
+}
+
+cmd="${1:-}"
+case "$cmd" in
+  ""|-h|--help|help) usage ;;
+  setup) shift; "$SHUK_ROOT/setup.sh" "$@" ;;
+  doctor) shift; "$SHUK_ROOT/core/doctor.sh" "$@" ;;
+  backup) shift; "$SHUK_ROOT/core/backup.sh" "$@" ;;
+  update) shift; git -C "$SHUK_ROOT" pull --ff-only ;;
+  hermes) shift; "$SHUK_ROOT/apps/hermes/launch.sh" "$@" ;;
+  mcp) shift; "$SHUK_ROOT/apps/hermes/mcp.sh" "$@" ;;
+  secrets) shift; "$SHUK_ROOT/core/secrets.sh" "$@" ;;
+  *) err "Unknown command: $cmd"; usage; exit 2 ;;
+esac
