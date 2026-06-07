@@ -4,7 +4,9 @@ source "$SHUK_ROOT/core/colors.sh"
 shuk_banner() {
   local width
   width="${COLUMNS:-$(tput cols 2>/dev/null || echo 100)}"
-  if [[ "$width" -lt 90 ]]; then
+  # The canonical banner is 78 columns wide. Show it whenever the terminal can
+  # fit it; fall back only for very narrow panes.
+  if [[ "$width" -lt 78 ]]; then
     printf "%b%s%b\n%b%s%b\n" "$C_INFO" '$HUKHOOD' "$C_RESET" "$C_DIM" "your personal AI home" "$C_RESET"
     return
   fi
