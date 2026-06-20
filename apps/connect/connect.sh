@@ -223,7 +223,7 @@ usage() {
 Usage:
   shuk connect claude          Register with Claude Code (claude mcp add)
   shuk connect codex           Register with Codex (codex mcp add)
-  shuk connect hermes          Print YAML block to add to ~/.hermes/config.yaml
+  shuk connect hermes          Register with Hermes (prints YAML block to paste)
   shuk connect --all           Register with every present client
   shuk connect --list          Show registration status per client
 USAGE

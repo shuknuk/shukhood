@@ -1,0 +1,550 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "name": "medical-research-skills",
+      "repo_path": "~/.hermes/sources/medical-research-skills",
+      "remote": "https://github.com/aipoch/medical-research-skills",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "medical-research",
+      "duplicate_policy": "prefer-awesome-rename-others",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ]
+    },
+    {
+      "name": "awesome-design-skills",
+      "repo_path": "~/.hermes/sources/awesome-design-skills",
+      "remote": "https://github.com/bergside/awesome-design-skills",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "awesome-design-skills",
+      "duplicate_policy": "rename-duplicates",
+      "name_prefix": "design-",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ]
+    },
+    {
+      "name": "awesome-claude-skills-index",
+      "repo_path": "~/.hermes/sources/awesome-claude-skills",
+      "remote": "https://github.com/travisvn/awesome-claude-skills",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "awesome-claude-skills-index",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "include_path_regex": [
+        "a^"
+      ]
+    },
+    {
+      "name": "anthropic-skills-docs",
+      "repo_path": "~/.hermes/sources/anthropic-skills",
+      "remote": "https://github.com/anthropics/skills",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "docs",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "include_path_regex": [
+        "^skills/(docx|pdf|pptx|xlsx|doc-coauthoring)$"
+      ]
+    },
+    {
+      "name": "anthropic-skills-design",
+      "repo_path": "~/.hermes/sources/anthropic-skills",
+      "remote": "https://github.com/anthropics/skills",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "design-skills/anthropic",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "include_path_regex": [
+        "^skills/(algorithmic-art|brand-guidelines|canvas-design|frontend-design|theme-factory|web-artifacts-builder)$"
+      ]
+    },
+    {
+      "name": "anthropic-skills-productivity",
+      "repo_path": "~/.hermes/sources/anthropic-skills",
+      "remote": "https://github.com/anthropics/skills",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "productivity/anthropic",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "include_path_regex": [
+        "^skills/internal-comms$"
+      ]
+    },
+    {
+      "name": "anthropic-skills-development",
+      "repo_path": "~/.hermes/sources/anthropic-skills",
+      "remote": "https://github.com/anthropics/skills",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "software-development/anthropic",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "include_path_regex": [
+        "^skills/(claude-api|mcp-builder|webapp-testing|skill-creator)$"
+      ]
+    },
+    {
+      "name": "anthropic-skills-media",
+      "repo_path": "~/.hermes/sources/anthropic-skills",
+      "remote": "https://github.com/anthropics/skills",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "media/anthropic",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "include_path_regex": [
+        "^skills/slack-gif-creator$"
+      ]
+    },
+    {
+      "name": "superpowers-core",
+      "repo_path": "~/.hermes/sources/superpowers",
+      "remote": "https://github.com/obra/superpowers",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "superpowers/core",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "name_prefix": "superpowers-core-",
+      "include_path_regex": [
+        "^skills/"
+      ]
+    },
+    {
+      "name": "superpowers-community",
+      "repo_path": "~/.hermes/sources/superpowers-skills",
+      "remote": "https://github.com/obra/superpowers-skills",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "superpowers/community",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "name_prefix": "superpowers-",
+      "include_path_regex": [
+        "^skills/"
+      ]
+    },
+    {
+      "name": "superpowers-lab",
+      "repo_path": "~/.hermes/sources/superpowers-lab",
+      "remote": "https://github.com/obra/superpowers-lab",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "superpowers/lab",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "name_prefix": "superpowers-lab-",
+      "include_path_regex": [
+        "^skills/"
+      ]
+    },
+    {
+      "name": "ios-simulator-skill",
+      "repo_path": "~/.hermes/sources/ios-simulator-skill",
+      "remote": "https://github.com/conorluddy/ios-simulator-skill",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "ios",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "include_path_regex": [
+        "^ios-simulator-skill/skills/"
+      ]
+    },
+    {
+      "name": "ffuf-claude-skill",
+      "repo_path": "~/.hermes/sources/ffuf_claude_skill",
+      "remote": "https://github.com/jthack/ffuf_claude_skill",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "security/ffuf",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "include_path_regex": [
+        "^ffuf-skill$"
+      ]
+    },
+    {
+      "name": "playwright-skill",
+      "repo_path": "~/.hermes/sources/playwright-skill",
+      "remote": "https://github.com/lackeyjb/playwright-skill",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "browser-automation",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "include_path_regex": [
+        "^skills/"
+      ]
+    },
+    {
+      "name": "claude-d3js-skill",
+      "repo_path": "~/.hermes/sources/claude-d3js-skill",
+      "remote": "https://github.com/chrisvoncsefalvay/claude-d3js-skill",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "design-skills/d3js",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "include_path_regex": [
+        "^\\.$"
+      ]
+    },
+    {
+      "name": "claude-scientific-skills",
+      "repo_path": "~/.hermes/sources/claude-scientific-skills",
+      "remote": "https://github.com/K-Dense-AI/claude-scientific-skills",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "scientific-skills",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "name_prefix": "scientific-",
+      "include_path_regex": [
+        "^skills/"
+      ]
+    },
+    {
+      "name": "web-asset-generator",
+      "repo_path": "~/.hermes/sources/web-asset-generator",
+      "remote": "https://github.com/alonw0/web-asset-generator",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "design-skills/web-assets",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "include_path_regex": [
+        "^skills/"
+      ]
+    },
+    {
+      "name": "loki-mode-root",
+      "repo_path": "~/.hermes/sources/claudeskill-loki-mode",
+      "remote": "https://github.com/asklokesh/claudeskill-loki-mode",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "autonomous-ai-agents/loki",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules",
+        "agent-skills",
+        "integrations"
+      ],
+      "name_prefix": "loki-",
+      "include_path_regex": [
+        "^\\.$"
+      ]
+    },
+    {
+      "name": "trailofbits-security-skills",
+      "repo_path": "~/.hermes/sources/trailofbits-skills",
+      "remote": "https://github.com/trailofbits/skills",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "security/trailofbits",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "name_prefix": "tob-",
+      "include_path_regex": [
+        "^plugins/"
+      ]
+    },
+    {
+      "name": "frontend-slides",
+      "repo_path": "~/.hermes/sources/frontend-slides",
+      "remote": "https://github.com/zarazhangrui/frontend-slides",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "design-skills/frontend-slides",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "name_prefix": "slides-",
+      "include_path_regex": [
+        "^plugins/frontend-slides/skills/frontend-slides$"
+      ]
+    },
+    {
+      "name": "expo-skills",
+      "repo_path": "~/.hermes/sources/expo-skills",
+      "remote": "https://github.com/expo/skills",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "mobile-development/expo",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "name_prefix": "expo-",
+      "include_path_regex": [
+        "^plugins/expo/skills/"
+      ]
+    },
+    {
+      "name": "skill-seekers",
+      "repo_path": "~/.hermes/sources/Skill_Seekers",
+      "remote": "https://github.com/yusufkaraaslan/Skill_Seekers",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "skill-building/skill-seekers",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "name_prefix": "skillseekers-",
+      "include_path_regex": [
+        "^skills/skill-seekers$",
+        "^distribution/claude-plugin/skills/skill-builder$"
+      ],
+      "exclude_path_regex": [
+        "^tests/"
+      ]
+    },
+    {
+      "name": "anthropic-claude-cookbooks",
+      "repo_path": "~/.hermes/sources/claude-cookbooks",
+      "remote": "https://github.com/anthropics/claude-cookbooks",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "anthropic-cookbooks",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "name_prefix": "cookbook-",
+      "include_path_regex": [
+        "^\\.claude/skills/",
+        "^managed_agents/",
+        "^skills/custom_skills/"
+      ]
+    },
+    {
+      "name": "loki-mode-agent-skills",
+      "repo_path": "~/.hermes/sources/claudeskill-loki-mode",
+      "remote": "https://github.com/asklokesh/claudeskill-loki-mode",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "autonomous-ai-agents/loki-addons",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "name_prefix": "loki-",
+      "include_path_regex": [
+        "^agent-skills/"
+      ]
+    },
+    {
+      "name": "loki-mode-openclaw",
+      "repo_path": "~/.hermes/sources/claudeskill-loki-mode",
+      "remote": "https://github.com/asklokesh/claudeskill-loki-mode",
+      "branch": "main",
+      "install_mode": "flatten-skill-dirs",
+      "dest_category": "autonomous-ai-agents/loki-openclaw",
+      "duplicate_policy": "rename-duplicates",
+      "ignore_dirs": [
+        ".DS_Store",
+        ".git",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        "__pycache__",
+        "node_modules"
+      ],
+      "name_prefix": "loki-openclaw-",
+      "include_path_regex": [
+        "^integrations/openclaw$"
+      ]
+    }
+  ],
+  "auto_discover": {
+    "sources_dir": "~/.hermes/sources",
+    "mode": "flatten-skill-dirs",
+    "enabled": true
+  }
+}

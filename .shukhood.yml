@@ -1,40 +1,7 @@
 shukhood:
   theme: nord
   banner: true
-  default_tool: hermes  # currently unused — bin/shuk has no bare-shuk default dispatch
   repo_root: ~/Developer/shukhood
-
-hermes:
-  enabled: true
-  profile: shukhood
-  preload_skills:
-    - shukhood-router
-  raw_command: hermes
-  launch_args:
-    - --profile
-    - shukhood
-  backup:
-    include_skills: true
-    include_config: true
-    include_mcp: true
-    include_cron: false
-    sanitize: true
-
-codex:
-  enabled: false
-  raw_command: codex
-
-claude:
-  enabled: false
-  raw_command: claude
-
-agy:
-  enabled: false
-  raw_command: agy
-
-opencode:
-  enabled: false
-  raw_command: opencode
 
 tools:
   required:

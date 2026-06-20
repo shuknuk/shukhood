@@ -1,22 +1,27 @@
 #!/usr/bin/env bash
-# shuk skills update [<name> | --all] — re-vendor one or all source-tracked skills.
+# shuk skills update [<name> | --all] — update one or all source-tracked skills.
+#
+# Pulls from the upstream git clone in ~/.hermes/sources/ (Hermes maintains
+# these clones; we read from them). Then rsyncs the relevant subdirectory
+# into skills/ and writes a fresh .shukhood-source.json.
 #
 # Decision matrix per skill:
-#   local-mods=yes + hermes-updated=yes  → CONFLICT: skip, report, do not overwrite
-#   local-mods=yes + hermes-updated=no   → nothing to do (no-op)
-#   local-mods=no  + hermes-updated=yes  → update vendored copy, refresh provenance
-#   local-mods=no  + hermes-updated=no   → already current (no-op)
+#   local-mods=yes + git-ahead=yes  → CONFLICT: skip, report, do not overwrite
+#   local-mods=yes + git-ahead=no   → nothing to do (no-op)
+#   local-mods=no  + git-ahead=yes  → git pull, rsync, refresh provenance
+#   local-mods=no  + git-ahead=no   → already current (no-op)
 #
-# Does NOT touch ~/.hermes/ or git repos — those are Hermes' responsibility.
+# Does NOT touch ~/.hermes/ in any way besides reading from ~/.hermes/sources/.
 set -euo pipefail
 
 SHUK_ROOT="${SHUK_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 source "$SHUK_ROOT/core/logging.sh"
 
 DEST="$SHUK_ROOT/skills"
+SOURCES_JSON="$SHUK_ROOT/apps/skills/skill-sources.json"
 
 # ---------------------------------------------------------------------------
-# Content hash (identical to sync.sh and check.sh)
+# Content hash (identical to check.sh)
 # ---------------------------------------------------------------------------
 _content_hash() {
   local dir="$1"
@@ -41,32 +46,30 @@ _update_one() {
   local prov_file="$DEST/$name/.shukhood-source.json"
 
   if [[ ! -f "$prov_file" ]]; then
-    warn "  [$name] no .shukhood-source.json — run 'shuk skills sync' first"
+    warn "  [$name] no .shukhood-source.json — provenance missing"
     return 3
   fi
 
-  # Read ALL fields from provenance BEFORE rsync (rsync --delete will remove the file)
-  local stype source_name remote repo_path branch recorded_hash synced_from
+  local stype source_name remote repo_path branch recorded_hash install_mode dest_category
   stype="$(jq -r '.source_type'       "$prov_file" 2>/dev/null || echo "")"
   source_name="$(jq -r '.source_name' "$prov_file" 2>/dev/null || echo "")"
   remote="$(jq -r '.remote'           "$prov_file" 2>/dev/null || echo "")"
   repo_path="$(jq -r '.source_repo_path' "$prov_file" 2>/dev/null || echo "")"
   branch="$(jq -r '.source_branch'    "$prov_file" 2>/dev/null || echo "")"
   recorded_hash="$(jq -r '.content_hash'  "$prov_file" 2>/dev/null || echo "")"
-  synced_from="$(jq -r '.synced_from' "$prov_file" 2>/dev/null || echo "")"
 
   if [[ "$stype" != "source-tracked" ]]; then
     info "  [$name] local skill — skipped (no upstream)"
     return 3
   fi
 
-  local vendored_dir="$DEST/$name"
-  local hermes_dir="$synced_from"
-
-  if [[ ! -d "$hermes_dir" ]]; then
-    warn "  [$name] Hermes install dir not found: $hermes_dir"
+  if [[ -z "$repo_path" || "$repo_path" == "null" || ! -d "$repo_path/.git" ]]; then
+    warn "  [$name] source git clone not found at: $repo_path"
+    warn "         (Hermes manages these clones; ensure Hermes has installed this skill)"
     return 3
   fi
+
+  local vendored_dir="$DEST/$name"
 
   # ── Check for local modifications ────────────────────────────────────────
   local local_modified=0
@@ -76,49 +79,79 @@ _update_one() {
     [[ "$current_hash" != "$recorded_hash" ]] && local_modified=1
   fi
 
-  # ── Check if Hermes has an updated install ───────────────────────────────
-  local hermes_updated=0
-  local hermes_hash
-  hermes_hash="$(_content_hash "$hermes_dir" || echo "")"
-  if [[ -n "$recorded_hash" && "$recorded_hash" != "null" && "$hermes_hash" != "$recorded_hash" ]]; then
-    hermes_updated=1
+  # ── Pull from upstream and check if anything changed ─────────────────────
+  git -C "$repo_path" fetch --quiet origin 2>/dev/null || true
+  local origin_commit recorded_commit git_behind=0
+  recorded_commit="$(jq -r '.source_commit' "$prov_file" 2>/dev/null || echo "")"
+  origin_commit="$(git -C "$repo_path" rev-parse "origin/${branch}" 2>/dev/null || echo "")"
+
+  if [[ -n "$origin_commit" && -n "$recorded_commit" && "$recorded_commit" != "null" ]]; then
+    [[ "$origin_commit" != "$recorded_commit" ]] && git_behind=1
   fi
 
   # ── Decision ─────────────────────────────────────────────────────────────
-  if [[ "$local_modified" -eq 1 && "$hermes_updated" -eq 1 ]]; then
-    err "  [$name] CONFLICT — local edits detected AND Hermes has an update"
-    echo "          skills/$name/ was modified after last sync"
-    echo "          ~/.hermes/skills/$name/ has also changed"
-    echo "          Resolve manually, then re-run 'shuk skills sync' to force re-vendor"
+  if [[ "$local_modified" -eq 1 && "$git_behind" -eq 1 ]]; then
+    err "  [$name] CONFLICT — local edits detected AND upstream has new commits"
+    echo "          Resolve manually, then re-run 'shuk skills update $name'"
     return 2
   fi
 
-  if [[ "$local_modified" -eq 1 && "$hermes_updated" -eq 0 ]]; then
-    info "  [$name] local edits present but Hermes has no update — nothing to do"
+  if [[ "$local_modified" -eq 1 && "$git_behind" -eq 0 ]]; then
+    info "  [$name] local edits present but upstream is not ahead — nothing to do"
     return 1
   fi
 
-  if [[ "$hermes_updated" -eq 0 ]]; then
+  if [[ "$git_behind" -eq 0 ]]; then
     ok "  [$name] already current"
     return 1
   fi
 
-  # ── Safe to update ───────────────────────────────────────────────────────
-  # rsync --delete removes .shukhood-source.json (it lives only in vendored, not in Hermes)
-  # We write a fresh one immediately after.
+  # ── Safe to update: git pull, then rsync from the relevant subdir ─────────
+  git -C "$repo_path" pull --ff-only --quiet origin "$branch" 2>/dev/null || {
+    warn "  [$name] git pull failed — skipping"
+    return 3
+  }
+
+  # Find which subdir within the repo maps to this skill.
+  # The source entry in skill-sources.json has dest_category (e.g. "ios" or "medical-research").
+  # The repo_path is the full git clone root. We need to find what within it maps to this skill.
+  # For install_mode=flatten-skill-dirs, individual skill dirs within the clone become skills.
+  # For single-dir installs, the clone root IS the skill.
+  # We use the recorded source_name to look up install_mode from skill-sources.json.
+  local src_dir
+  if [[ -f "$SOURCES_JSON" ]] && command -v jq >/dev/null 2>&1; then
+    local install_mode
+    install_mode="$(jq -r --arg sn "$source_name" \
+      '.sources[] | select(.name == $sn) | .install_mode // "single-dir"' \
+      "$SOURCES_JSON" 2>/dev/null)"
+    if [[ "$install_mode" == "flatten-skill-dirs" ]]; then
+      # The skill dir name inside the repo clone corresponds to the final component of skills/<name>
+      # E.g. skills/medical-research/<subskill> — src_dir = $repo_path/<subskill>
+      local sub="${name##*/}"
+      src_dir="$repo_path/$sub"
+    else
+      src_dir="$repo_path"
+    fi
+  else
+    src_dir="$repo_path"
+  fi
+
+  if [[ ! -d "$src_dir" ]]; then
+    warn "  [$name] source dir not found after pull: $src_dir"
+    return 3
+  fi
+
   rsync -a --delete \
     --exclude='.DS_Store' \
     --exclude='__pycache__/' \
     --exclude='*.pyc' \
     --exclude='.git/' \
-    "$hermes_dir" "$vendored_dir/" 2>/dev/null
+    --exclude='.shukhood-source.json' \
+    "$src_dir/" "$vendored_dir/" 2>/dev/null
 
   local new_hash new_commit last_synced
   new_hash="$(_content_hash "$vendored_dir" || echo "")"
-  new_commit=""
-  if [[ -n "$repo_path" && -d "$repo_path/.git" ]]; then
-    new_commit="$(git -C "$repo_path" rev-parse HEAD 2>/dev/null || echo "")"
-  fi
+  new_commit="$(git -C "$repo_path" rev-parse HEAD 2>/dev/null || echo "")"
   last_synced="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
   cat > "$prov_file" <<EOF
@@ -130,7 +163,7 @@ _update_one() {
   "source_repo_path": "$repo_path",
   "source_branch": "$branch",
   "source_commit": "$new_commit",
-  "synced_from": "$synced_from",
+  "synced_from": "canonical-repo",
   "last_synced": "$last_synced",
   "content_hash": "$new_hash"
 }
@@ -159,7 +192,7 @@ if [[ "$target" == "--all" ]]; then
     [[ "$stype" != "source-tracked" ]] && continue
     name="$(jq -r '.skill' "$prov_file" 2>/dev/null || echo "")"
     [[ -z "$name" ]] && continue
-    _update_one "$name" || true  # capture rc via $?
+    _update_one "$name" || true
     rc=$?
     case $rc in
       0) n_updated=$((n_updated+1)) ;;

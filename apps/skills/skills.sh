@@ -35,10 +35,6 @@ _cmd_serve() {
   exec "$VENV/bin/python" "$SERVER"
 }
 
-_cmd_sync() {
-  exec "$SKILLS_APP/sync.sh" "$@"
-}
-
 _cmd_check() {
   exec "$SKILLS_APP/check.sh" "$@"
 }
@@ -51,24 +47,21 @@ _cmd_status() {
   _ensure_venv
   info "Skills server: $SERVER"
   info "Venv: $VENV"
-  local hermes_count vendored_count
-  hermes_count=$(find "$HOME/.hermes/skills" -maxdepth 1 -not -name '.*' -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
-  info "Hermes skills available: $hermes_count"
+  local skill_count
   if [[ -d "$SHUK_ROOT/skills" ]]; then
-    vendored_count=$(find "$SHUK_ROOT/skills" -maxdepth 1 -not -name '.*' -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
-    info "Vendored skills (skills/): $vendored_count"
-    if [[ "$vendored_count" -eq 0 ]]; then
-      warn "No vendored skills yet — run 'shuk skills sync' to populate skills/"
+    skill_count=$(find "$SHUK_ROOT/skills" -maxdepth 1 -not -name '.*' -mindepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+    info "Skills: $skill_count top-level directories in skills/"
+    if [[ "$skill_count" -eq 0 ]]; then
+      warn "skills/ is empty — populate it before starting the server"
     fi
   else
-    warn "skills/ dir not found — server will read from ~/.hermes/skills/ directly"
+    warn "skills/ directory not found"
   fi
 }
 
 sub="${1:-}"
 case "$sub" in
   serve)    shift; _cmd_serve "$@" ;;
-  sync)     shift; _cmd_sync "$@" ;;
   check)    shift; _cmd_check "$@" ;;
   update)   shift; _cmd_update "$@" ;;
   status)   shift; _cmd_status "$@" ;;
@@ -77,10 +70,9 @@ case "$sub" in
 Usage: shuk skills <subcommand>
 
   serve              Start the skills MCP server (stdio)
-  sync               Vendor ~/.hermes/skills/ into skills/ with provenance
-  check [--no-fetch] Report sync status for all source-tracked skills
-  update <name>      Re-vendor one source-tracked skill (conflict-safe)
-  update --all       Re-vendor all source-tracked skills
+  check [--no-fetch] Report status for all source-tracked skills
+  update <name>      Update one source-tracked skill from upstream git
+  update --all       Update all source-tracked skills from upstream git
   status             Show server config and skill counts
 
 USAGE

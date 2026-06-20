@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Shukhood skills MCP server — exposes Hermes skills as MCP resources (stdio)."""
+"""Shukhood skills MCP server — exposes skills as MCP resources (stdio)."""
 
 import os
 import re
@@ -15,7 +15,6 @@ from fastmcp import FastMCP
 # ---------------------------------------------------------------------------
 _REPO_ROOT = Path(__file__).parent.parent.parent
 _VENDORED = _REPO_ROOT / "skills"
-_HERMES = Path.home() / ".hermes" / "skills"
 
 
 def _resolve_skills_dir() -> Path:
@@ -24,9 +23,7 @@ def _resolve_skills_dir() -> Path:
         p = Path(env)
         if p.is_dir():
             return p
-    if _VENDORED.is_dir() and any(p for p in _VENDORED.iterdir() if not p.name.startswith(".")):
-        return _VENDORED
-    return _HERMES
+    return _VENDORED
 
 
 SKILLS_DIR = _resolve_skills_dir()
