@@ -69,11 +69,12 @@ case "$sub" in
     cat <<'USAGE'
 Usage: shuk skills <subcommand>
 
-  serve              Start the skills MCP server (stdio)
-  check [--no-fetch] Report status for all source-tracked skills
-  update <name>      Update one source-tracked skill from upstream git
-  update --all       Update all source-tracked skills from upstream git
-  status             Show server config and skill counts
+  serve           Start the skills MCP server (stdio)
+  check           Report status for all source-tracked skills (offline)
+  check --fetch   Same, also git fetch to check for new upstream commits
+  update <name>   Update one source-tracked skill from upstream git
+  update --all    Update all source-tracked skills from upstream git
+  status          Show server config and skill counts
 
 USAGE
     ;;

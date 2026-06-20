@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
 # shuk skills update [<name> | --all] — update one or all source-tracked skills.
 #
-# Pulls from the upstream git clone in ~/.hermes/sources/ (Hermes maintains
-# these clones; we read from them). Then rsyncs the relevant subdirectory
-# into skills/ and writes a fresh .shukhood-source.json.
+# Pulls directly from upstream git remotes into sources/ (Shukhood's own clones),
+# then rsyncs the relevant content into skills/. No dependency on ~/.hermes/.
 #
 # Decision matrix per skill:
 #   local-mods=yes + git-ahead=yes  → CONFLICT: skip, report, do not overwrite
 #   local-mods=yes + git-ahead=no   → nothing to do (no-op)
 #   local-mods=no  + git-ahead=yes  → git pull, rsync, refresh provenance
 #   local-mods=no  + git-ahead=no   → already current (no-op)
-#
-# Does NOT touch ~/.hermes/ in any way besides reading from ~/.hermes/sources/.
 set -euo pipefail
 
 SHUK_ROOT="${SHUK_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 source "$SHUK_ROOT/core/logging.sh"
 
 DEST="$SHUK_ROOT/skills"
+SOURCES_DIR="$SHUK_ROOT/sources"
 SOURCES_JSON="$SHUK_ROOT/apps/skills/skill-sources.json"
+
+mkdir -p "$SOURCES_DIR"
 
 # ---------------------------------------------------------------------------
 # Content hash (identical to check.sh)
@@ -39,6 +39,23 @@ _content_hash() {
 }
 
 # ---------------------------------------------------------------------------
+# Ensure we have a local clone of a source repo. Returns the clone path.
+# ---------------------------------------------------------------------------
+_ensure_clone() {
+  local source_name="$1"
+  local remote="$2"
+  local branch="$3"
+  local clone_dir="$SOURCES_DIR/$source_name"
+
+  if [[ ! -d "$clone_dir/.git" ]]; then
+    info "  cloning $source_name from $remote ..."
+    git clone --quiet --branch "$branch" "$remote" "$clone_dir" 2>/dev/null \
+      || git clone --quiet "$remote" "$clone_dir" 2>/dev/null
+  fi
+  echo "$clone_dir"
+}
+
+# ---------------------------------------------------------------------------
 # Update a single skill dir. Returns 0=updated, 1=current/noop, 2=conflict, 3=skip
 # ---------------------------------------------------------------------------
 _update_one() {
@@ -50,24 +67,27 @@ _update_one() {
     return 3
   fi
 
-  local stype source_name remote repo_path branch recorded_hash install_mode dest_category
-  stype="$(jq -r '.source_type'       "$prov_file" 2>/dev/null || echo "")"
-  source_name="$(jq -r '.source_name' "$prov_file" 2>/dev/null || echo "")"
-  remote="$(jq -r '.remote'           "$prov_file" 2>/dev/null || echo "")"
-  repo_path="$(jq -r '.source_repo_path' "$prov_file" 2>/dev/null || echo "")"
-  branch="$(jq -r '.source_branch'    "$prov_file" 2>/dev/null || echo "")"
-  recorded_hash="$(jq -r '.content_hash'  "$prov_file" 2>/dev/null || echo "")"
+  local stype source_name remote branch recorded_hash recorded_commit install_mode
+  stype="$(jq -r '.source_type'        "$prov_file" 2>/dev/null || echo "")"
+  source_name="$(jq -r '.source_name'  "$prov_file" 2>/dev/null || echo "")"
+  remote="$(jq -r '.remote'            "$prov_file" 2>/dev/null || echo "")"
+  branch="$(jq -r '.source_branch'     "$prov_file" 2>/dev/null || echo "")"
+  recorded_hash="$(jq -r '.content_hash'   "$prov_file" 2>/dev/null || echo "")"
+  recorded_commit="$(jq -r '.source_commit' "$prov_file" 2>/dev/null || echo "")"
 
   if [[ "$stype" != "source-tracked" ]]; then
     info "  [$name] local skill — skipped (no upstream)"
     return 3
   fi
 
-  if [[ -z "$repo_path" || "$repo_path" == "null" || ! -d "$repo_path/.git" ]]; then
-    warn "  [$name] source git clone not found at: $repo_path"
-    warn "         (Hermes manages these clones; ensure Hermes has installed this skill)"
+  if [[ -z "$remote" || "$remote" == "null" ]]; then
+    warn "  [$name] no remote URL in provenance"
     return 3
   fi
+
+  # ── Ensure local clone exists ─────────────────────────────────────────────
+  local clone_dir
+  clone_dir="$(_ensure_clone "$source_name" "$remote" "${branch:-main}")"
 
   local vendored_dir="$DEST/$name"
 
@@ -79,11 +99,10 @@ _update_one() {
     [[ "$current_hash" != "$recorded_hash" ]] && local_modified=1
   fi
 
-  # ── Pull from upstream and check if anything changed ─────────────────────
-  git -C "$repo_path" fetch --quiet origin 2>/dev/null || true
-  local origin_commit recorded_commit git_behind=0
-  recorded_commit="$(jq -r '.source_commit' "$prov_file" 2>/dev/null || echo "")"
-  origin_commit="$(git -C "$repo_path" rev-parse "origin/${branch}" 2>/dev/null || echo "")"
+  # ── Fetch and check if upstream has new commits ───────────────────────────
+  git -C "$clone_dir" fetch --quiet origin 2>/dev/null || true
+  local origin_commit git_behind=0
+  origin_commit="$(git -C "$clone_dir" rev-parse "origin/${branch:-main}" 2>/dev/null || echo "")"
 
   if [[ -n "$origin_commit" && -n "$recorded_commit" && "$recorded_commit" != "null" ]]; then
     [[ "$origin_commit" != "$recorded_commit" ]] && git_behind=1
@@ -106,34 +125,24 @@ _update_one() {
     return 1
   fi
 
-  # ── Safe to update: git pull, then rsync from the relevant subdir ─────────
-  git -C "$repo_path" pull --ff-only --quiet origin "$branch" 2>/dev/null || {
+  # ── Safe to update: pull, then rsync from the relevant subdir ────────────
+  git -C "$clone_dir" pull --ff-only --quiet origin "${branch:-main}" 2>/dev/null || {
     warn "  [$name] git pull failed — skipping"
     return 3
   }
 
-  # Find which subdir within the repo maps to this skill.
-  # The source entry in skill-sources.json has dest_category (e.g. "ios" or "medical-research").
-  # The repo_path is the full git clone root. We need to find what within it maps to this skill.
-  # For install_mode=flatten-skill-dirs, individual skill dirs within the clone become skills.
-  # For single-dir installs, the clone root IS the skill.
-  # We use the recorded source_name to look up install_mode from skill-sources.json.
-  local src_dir
-  if [[ -f "$SOURCES_JSON" ]] && command -v jq >/dev/null 2>&1; then
-    local install_mode
-    install_mode="$(jq -r --arg sn "$source_name" \
-      '.sources[] | select(.name == $sn) | .install_mode // "single-dir"' \
-      "$SOURCES_JSON" 2>/dev/null)"
-    if [[ "$install_mode" == "flatten-skill-dirs" ]]; then
-      # The skill dir name inside the repo clone corresponds to the final component of skills/<name>
-      # E.g. skills/medical-research/<subskill> — src_dir = $repo_path/<subskill>
-      local sub="${name##*/}"
-      src_dir="$repo_path/$sub"
-    else
-      src_dir="$repo_path"
-    fi
+  # Determine which subdirectory within the clone maps to this skill.
+  local src_dir install_mode
+  install_mode="$(jq -r --arg sn "$source_name" \
+    '.sources[] | select(.name == $sn) | .install_mode // "single-dir"' \
+    "$SOURCES_JSON" 2>/dev/null || echo "single-dir")"
+
+  if [[ "$install_mode" == "flatten-skill-dirs" ]]; then
+    # skills/<category>/<subskill> — clone/<subskill>
+    local sub="${name##*/}"
+    src_dir="$clone_dir/$sub"
   else
-    src_dir="$repo_path"
+    src_dir="$clone_dir"
   fi
 
   if [[ ! -d "$src_dir" ]]; then
@@ -151,7 +160,7 @@ _update_one() {
 
   local new_hash new_commit last_synced
   new_hash="$(_content_hash "$vendored_dir" || echo "")"
-  new_commit="$(git -C "$repo_path" rev-parse HEAD 2>/dev/null || echo "")"
+  new_commit="$(git -C "$clone_dir" rev-parse HEAD 2>/dev/null || echo "")"
   last_synced="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
   cat > "$prov_file" <<EOF
@@ -160,8 +169,8 @@ _update_one() {
   "source_type": "source-tracked",
   "source_name": "$source_name",
   "remote": "$remote",
-  "source_repo_path": "$repo_path",
-  "source_branch": "$branch",
+  "source_repo_path": "$clone_dir",
+  "source_branch": "${branch:-main}",
   "source_commit": "$new_commit",
   "synced_from": "canonical-repo",
   "last_synced": "$last_synced",

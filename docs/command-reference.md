@@ -16,8 +16,8 @@ shuk secrets init        # create ~/.hermes/.env from template if missing
 # Skills MCP server
 shuk skills serve        # start the MCP server over stdio (clients do this automatically)
 shuk skills status       # show server config, venv, and skill counts
-shuk skills check        # report status for all source-tracked skills
-shuk skills check --no-fetch   # same, skip git fetch
+shuk skills check        # report status for all source-tracked skills (offline, uses sources/)
+shuk skills check --fetch      # same, also git fetch upstream remotes
 shuk skills update <name>      # update one source-tracked skill from upstream git
 shuk skills update --all       # update all source-tracked skills from upstream git
 

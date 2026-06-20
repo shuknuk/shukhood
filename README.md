@@ -21,8 +21,8 @@ shuk connect --all        # register with every present MCP client
 ```bash
 shuk skills serve                # start the MCP server over stdio
 shuk skills status               # show server config, venv path, and skill counts
-shuk skills check                # report status for all source-tracked skills
-shuk skills check --no-fetch     # same, skip git fetch (no network)
+shuk skills check                # report status for all source-tracked skills (offline)
+shuk skills check --fetch        # same, also git fetch to check for new upstream commits
 shuk skills update <name>        # update one source-tracked skill from upstream git
 shuk skills update --all         # update all source-tracked skills from upstream git
 ```
@@ -38,10 +38,10 @@ shuk skills update --all         # update all source-tracked skills from upstrea
 **Resource count.** With 102 skill dirs containing ~925 individual sub-skills, `list_resources()` returns 138 resources. Every sub-skill is still readable on demand via its URI.
 
 **Provenance model.** Skills fall into two tiers:
-- **Source-tracked** — 25 source groups with known git remotes in `apps/skills/skill-sources.json`. These participate in `shuk skills check` and `shuk skills update`, which pull directly from the upstream git clones in `~/.hermes/sources/` (Hermes manages those clones).
-- **Local-only** — everything else (~70+ dirs: `gstack-*`, `dogfood`, `voicebox`, etc.). No upstream sync attempted. This repo is the source of truth for these.
+- **Source-tracked** — 25 source groups with known git remotes in `apps/skills/skill-sources.json`. These participate in `shuk skills check` and `shuk skills update`, which clone/pull directly from upstream into `sources/` (Shukhood's own git clones, gitignored).
+- **Local-only** — everything else (~70+ dirs: `gstack-*`, `dogfood`, `voicebox`, etc.). No upstream sync. This repo is the source of truth for these.
 
-**Update flow.** `shuk skills update` fetches the upstream git clone, checks for local modifications and new upstream commits, then rsyncs the updated content. Decision matrix: local edits + upstream ahead = conflict (stop, report, touch nothing); local edits + no upstream change = no-op; no local edits + upstream ahead = update; both current = no-op.
+**Update flow.** `shuk skills update <name>` lazily clones the upstream repo into `sources/<source-name>/` on first run (directly from the remote URL in `skill-sources.json`), then fetches, checks for conflicts, and rsyncs the updated content into `skills/<name>/`. Decision matrix: local edits + upstream ahead = conflict (stop, report, touch nothing); local edits + no upstream change = no-op; no local edits + upstream ahead = update; both current = no-op.
 
 **Content hash.** Change detection uses SHA256 of all file paths + contents in a directory, excluding `.shukhood-source.json` and `.DS_Store`. Computed relative to the directory root so hashes are path-independent.
 

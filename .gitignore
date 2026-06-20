@@ -34,9 +34,13 @@ venv/
 __pycache__/
 *.pyc
 
-# Vendored skills (populated by shuk skills sync — not committed)
+# Skills (canonical content — not committed, managed locally)
 /skills/*/
 !/skills/.gitkeep
+
+# Upstream git clones (managed by shuk skills update)
+/sources/*/
+!/sources/.gitkeep
 
 # OS/editor
 .DS_Store
