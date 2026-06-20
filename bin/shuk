@@ -26,6 +26,19 @@ Usage:
   shuk backup              Back up safe configs for supported tools
   shuk update              Update Shukhood git repo
 
+  shuk connect claude      Register skills MCP server with Claude Code
+  shuk connect codex       Register skills MCP server with Codex
+  shuk connect hermes      Print YAML block to add to ~/.hermes/config.yaml
+  shuk connect --all       Register with every present MCP client
+  shuk connect --list      Show connection status per client
+
+  shuk skills serve        Start the skills MCP server (stdio)
+  shuk skills sync         Vendor ~/.hermes/skills/ into skills/ with provenance
+  shuk skills check        Report sync status for all source-tracked skills
+  shuk skills update NAME  Re-vendor one source-tracked skill (conflict-safe)
+  shuk skills update --all Re-vendor all source-tracked skills
+  shuk skills status       Show skill counts and server config
+
   shuk hermes              Launch Hermes with Shukhood profile
   shuk hermes raw          Launch raw official Hermes
   shuk hermes setup        Create/apply Hermes shukhood profile
@@ -34,6 +47,8 @@ Usage:
   shuk hermes update       Run official Hermes update
 
 Examples:
+  shuk skills serve
+  shuk skills sync && shuk skills serve
   shuk hermes
   shuk hermes chat -q "hello"
   shuk hermes setup --dry-run
@@ -48,6 +63,8 @@ case "$cmd" in
   doctor) shift; "$SHUK_ROOT/core/doctor.sh" "$@" ;;
   backup) shift; "$SHUK_ROOT/core/backup.sh" "$@" ;;
   update) shift; git -C "$SHUK_ROOT" pull --ff-only ;;
+  connect) shift; "$SHUK_ROOT/apps/connect/connect.sh" "$@" ;;
+  skills) shift; "$SHUK_ROOT/apps/skills/skills.sh" "$@" ;;
   hermes) shift; "$SHUK_ROOT/apps/hermes/launch.sh" "$@" ;;
   mcp) shift; "$SHUK_ROOT/apps/hermes/mcp.sh" "$@" ;;
   secrets) shift; "$SHUK_ROOT/core/secrets.sh" "$@" ;;

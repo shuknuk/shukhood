@@ -1,7 +1,7 @@
 shukhood:
   theme: nord
   banner: true
-  default_tool: hermes
+  default_tool: hermes  # currently unused — bin/shuk has no bare-shuk default dispatch
   repo_root: ~/Developer/shukhood
 
 hermes:
