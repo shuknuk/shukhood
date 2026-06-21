@@ -6,10 +6,23 @@ Shukhood is a shared skills MCP server. It stores a skill library canonically in
 
 ## Quick start
 
+**macOS / Linux:**
 ```bash
 ./setup.sh                # first time only: install shuk command
 shuk connect --all        # register with every present MCP client
 # clients launch `shuk skills serve` automatically via MCP
+```
+
+**Windows — Git Bash:**
+```bash
+./setup.sh                # creates shuk.cmd shim + adds to Windows User PATH
+shuk connect --all
+```
+
+**Windows — PowerShell (no Git Bash):**
+```powershell
+.\setup.ps1               # requires WSL or Git Bash; creates shuk.ps1 + shuk.cmd
+shuk connect --all
 ```
 
 ---
@@ -144,12 +157,22 @@ shuk secrets             # manage secrets (.env)
 
 ## First setup on a new machine
 
+**macOS / Linux / Git Bash:**
 ```bash
 cd ~/Developer/shukhood
 ./setup.sh               # installs shuk to ~/.local/bin/
 shuk doctor              # confirm tools and skills dir
 shuk connect --all       # register with every present MCP client
 shuk skills status       # verify skill count
+```
+
+**Windows PowerShell:**
+```powershell
+cd $HOME\Developer\shukhood
+.\setup.ps1              # installs shuk.ps1 + shuk.cmd to $HOME\.local\bin\, adds to PATH
+shuk doctor
+shuk connect --all
+shuk skills status
 ```
 
 ---
