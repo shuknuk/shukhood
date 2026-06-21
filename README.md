@@ -63,16 +63,14 @@ shuk connect hermes              # print YAML block to paste into ~/.hermes/conf
 
 ### Current connection status
 
-All three present clients are connected and verified (JSON-RPC `initialize` → `resources/list` round-trip confirmed returning 138 resources each):
+All four present clients are connected and verified:
 
 | Client | Version | Status | Config |
 |---|---|---|---|
 | Claude Code | 2.1.183 | connected | `~/.claude/settings.json` |
 | Codex | 0.134.0 | connected | `~/.codex/config.toml` |
 | Hermes | 0.16.0 | connected | `~/.hermes/config.yaml` |
-| Agy | 1.0.10 | installed, not yet connected | config location unknown |
-
-Agy is installed but has no discoverable config directory yet. Add `shuk connect agy` when Agy's MCP server registration mechanism is known.
+| Agy | 1.0.10 | connected | `~/.gemini/antigravity-cli/mcp_config.json` |
 
 ### Manual registration
 
@@ -96,6 +94,15 @@ mcp_servers:
 ```
 
 Shukhood does not auto-write `~/.hermes/config.yaml`. That file is a live Hermes config; `shuk connect hermes` prints the block above for you to paste.
+
+**Agy** — `shuk connect agy` writes directly to `~/.gemini/antigravity-cli/mcp_config.json` using `jq`:
+```json
+{
+  "mcpServers": {
+    "shukhood": { "command": "shuk", "args": ["skills", "serve"] }
+  }
+}
+```
 
 ### Verification
 
