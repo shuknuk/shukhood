@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shuk connect <client|--all|--list> — register the shukhood MCP server with AI clients.
 #
-# Supported clients: claude, codex, hermes
+# Supported clients: claude, codex, hermes, agy
 #
 # Claude Code and Codex are registered automatically via their CLIs.
 # Hermes prints a YAML block to paste into ~/.hermes/config.yaml — auto-write
@@ -16,6 +16,7 @@ source "$SHUK_ROOT/core/logging.sh"
 _claude_installed()  { command -v claude  &>/dev/null; }
 _codex_installed()   { command -v codex   &>/dev/null; }
 _hermes_present()    { [[ -f "$HOME/.hermes/config.yaml" ]]; }
+_agy_present()       { [[ -f "$HOME/.gemini/antigravity-cli/mcp_config.json" ]]; }
 
 # ── Helpers: already registered? ────────────────────────────────────────────
 
@@ -33,6 +34,11 @@ _codex_registered() {
 _hermes_registered() {
   _hermes_present || return 1
   grep -q 'shukhood' "$HOME/.hermes/config.yaml" 2>/dev/null
+}
+
+_agy_registered() {
+  _agy_present || return 1
+  grep -q '"shukhood"' "$HOME/.gemini/antigravity-cli/mcp_config.json" 2>/dev/null
 }
 
 # ── Server health check ──────────────────────────────────────────────────────
@@ -166,6 +172,37 @@ _connect_hermes() {
   echo ""
 }
 
+# ── Connect: Antigravity (agy) ───────────────────────────────────────────────
+
+_connect_agy() {
+  if ! _agy_present; then
+    warn "[agy] config not found — skipping"
+    return 0
+  fi
+
+  if _agy_registered; then
+    ok "[agy] already registered in ~/.gemini/antigravity-cli/mcp_config.json"
+    return 0
+  fi
+
+  info "[agy] registering shukhood in ~/.gemini/antigravity-cli/mcp_config.json"
+  local config_file="$HOME/.gemini/antigravity-cli/mcp_config.json"
+  if command -v jq &>/dev/null; then
+    jq '.mcpServers.shukhood = {"command": "shuk", "args": ["skills", "serve"]}' "$config_file" > "${config_file}.tmp"
+    mv "${config_file}.tmp" "$config_file"
+    if _agy_registered; then
+      ok "[agy] registration confirmed"
+      _verify_server
+    else
+      err "[agy] registration verification failed"
+      return 1
+    fi
+  else
+    err "[agy] jq is required to update agy config"
+    return 1
+  fi
+}
+
 # ── --list ───────────────────────────────────────────────────────────────────
 
 _cmd_list() {
@@ -200,6 +237,15 @@ _cmd_list() {
     warn "  hermes  installed, not connected  (run: shuk connect hermes)"
   fi
 
+  # Antigravity (agy)
+  if ! _agy_present; then
+    echo "  agy     not installed"
+  elif _agy_registered; then
+    ok "  agy     connected"
+  else
+    warn "  agy     installed, not connected  (run: shuk connect agy)"
+  fi
+
   echo ""
 }
 
@@ -214,6 +260,8 @@ _cmd_all() {
   _connect_codex  || true
   echo ""
   _connect_hermes || true
+  echo ""
+  _connect_agy    || true
 }
 
 # ── Usage ────────────────────────────────────────────────────────────────────
@@ -224,6 +272,7 @@ Usage:
   shuk connect claude          Register with Claude Code (claude mcp add)
   shuk connect codex           Register with Codex (codex mcp add)
   shuk connect hermes          Register with Hermes (prints YAML block to paste)
+  shuk connect agy             Register with Antigravity (updates mcp_config.json)
   shuk connect --all           Register with every present client
   shuk connect --list          Show registration status per client
 USAGE
@@ -237,6 +286,7 @@ case "$target" in
   claude)       _connect_claude ;;
   codex)        _connect_codex  ;;
   hermes)       _connect_hermes ;;
+  agy)          _connect_agy    ;;
   --all|-a)     _cmd_all        ;;
   --list|-l)    _cmd_list       ;;
   ""|--help|-h) usage           ;;
