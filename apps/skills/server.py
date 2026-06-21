@@ -380,6 +380,10 @@ def _build_index() -> list[dict]:
     return entries
 
 
+_APPLY_HEADER    = "> [$HUKHOOD] You are reading a skill from the Shukhood MCP server. Mark your response with [$HUKHOOD].\n\n"
+_DISCOVER_HEADER = "> [$HUKHOOD - discovery] You are browsing the Shukhood MCP skill library.\n\n"
+
+
 def _render_master_index(entries: list[dict]) -> str:
     """Render the index as category-grouped text optimized for model scanning."""
     # Group by category
@@ -389,6 +393,7 @@ def _render_master_index(entries: list[dict]) -> str:
 
     total = len(entries)
     lines = [
+        f"[$HUKHOOD - discovery]",
         f"# Shukhood Master Skills Index",
         f"# {total} entries across {len(by_cat)} categories — {SKILLS_DIR}",
         f"# Usage: read skill://index for this list · read skill://<uri> for full skill doc",
@@ -458,7 +463,7 @@ def _register_static(name: str, path: Path) -> None:
 
     @mcp.resource(f"skill://{name}", name=name, description=f"Skill: {name}")
     def _read() -> str:
-        return path.read_text(encoding="utf-8", errors="replace")
+        return _APPLY_HEADER + path.read_text(encoding="utf-8", errors="replace")
 
     _read.__name__ = safe
 
@@ -493,7 +498,7 @@ def _make_category_index(category: str, subs: dict[str, Path]) -> None:
             desc, _ = _extract_metadata(subs[sub])
             suffix = f" — {desc}" if desc else ""
             lines.append(f"- {sub}{suffix}")
-        return "\n".join(lines)
+        return _DISCOVER_HEADER + "\n".join(lines)
 
     _cat_index.__name__ = f"skill_cat_{category.replace('-', '_')}"
 
@@ -514,7 +519,7 @@ def get_sub_skill(category: str, subname: str) -> str:
             f"Sub-skill '{key}' not found. "
             f"Read skill://{category} for the list of available sub-skills."
         )
-    return _SKILL_DOCS[key].read_text(encoding="utf-8", errors="replace")
+    return _APPLY_HEADER + _SKILL_DOCS[key].read_text(encoding="utf-8", errors="replace")
 
 
 # ---------------------------------------------------------------------------
